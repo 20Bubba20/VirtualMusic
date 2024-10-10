@@ -2,10 +2,13 @@ import cv2
 import mediapipe as mp
 import imutils
 
+# Global Variables
+# - Media Pipe setup
 mpHands = mp.solutions.hands
 hands = mpHands.Hands()
 mpDraw = mp.solutions.drawing_utils
 
+# - 21 step Color Gradient
 color_dict = [
     (86, 41, 79),
     (99, 46, 84),
@@ -41,52 +44,55 @@ def process_image(img):
 
 # Drawing landmark connections
 def draw_hand_connections(img, results):
-    if results.multi_hand_landmarks:
-        points = []
-        hand_positions = []
-        for i in range(len(results.multi_hand_landmarks)):
-            handLms = results.multi_hand_landmarks[i]
-            handpoints = []
-            for id, lm in enumerate(handLms.landmark):
-                h, w, c = img.shape
+    # Check if there are hands
+    if not results.multi_hand_landmarks:
+        return None, None
 
-                # Finding the coordinates of each landmark
-                cx, cy = int(lm.x * w), int(lm.y * h)
+    # List of hands in frame (testing showed max of 2)
+    # - average position, list of positions
+    hand_positions: list[tuple[tuple[int,int],list[int,int]] = []
+    for i in range(len(results.multi_hand_landmarks)):
+        handLms = results.multi_hand_landmarks[i]
+        handpoints = []
+        for id, lm in enumerate(handLms.landmark):
+            h, w, c = img.shape
 
-                # Printing each landmark ID and coordinates
-                # on the terminal
-                handpoints.append((id, cx, cy))
+            # Finding the coordinates of each landmark
+            cx, cy = int(lm.x * w), int(lm.y * h)
 
-                # Creating a circle around each landmark
-                cv2.circle(img, (cx, cy), 10, color_dict[id],
-                           cv2.FILLED)
-                # Drawing the landmark connections
-                mpDraw.draw_landmarks(img, handLms,
-                                      mpHands.HAND_CONNECTIONS)
-                
-            sum_x = 0
-            sum_y = 0
-            for id, x, y in handpoints:
-                sum_x += x
-                sum_y += y
-            hand_pos = (int(sum_x/len(handpoints)), int(sum_y/len(handpoints)))
-            cv2.circle(img, hand_pos, 10, (125,125,125),
-                           cv2.FILLED)
-            points.extend(handpoints)
-            hand_positions.append((hand_pos,handpoints))
-            # print('Hand Position:', hand_pos)
-        return img, hand_positions
-    return None, None
+            # Printing each landmark ID and coordinates
+            # on the terminal
+            handpoints.append((id, cx, cy))
 
+            # Creating a circle around each landmark
+            cv2.circle(img, (cx, cy), 10, color_dict[id],
+                       cv2.FILLED)
+            # Drawing the landmark connections
+            mpDraw.draw_landmarks(img, handLms,
+                                  mpHands.HAND_CONNECTIONS)
+
+        # Calculate hand position 
+        sum_x = 0
+        sum_y = 0
+        for id, x, y in handpoints:
+            sum_x += x
+            sum_y += y
+        hand_pos = (int(sum_x/len(handpoints)), int(sum_y/len(handpoints)))
+        cv2.circle(img, hand_pos, 10, (125,125,125),
+                       cv2.FILLED)
+        hand_positions.append((hand_pos,handpoints))
+        # print('Hand Position:', hand_pos)
+    return img, hand_positions
+    
 def main():
-    # Replace 0 with the video path to use a
-    # pre-recorded video
+    # Set default camera 0 and prefered resolution of 1000px x 1000px
     camera = 0
-    selected = False
     resolution = (1000,1000)
     print(f'Camera {camera}')
+    print('Hit "n" for NEXT or "q" to EXIT')
     cap = cv2.VideoCapture(camera)
-    print('Selecting camera: Hit "n" for NEXT or "y" for YES')
+
+    # Set list of saved hand positions for movement tracking
     hand_que = []
     while True:
         # Taking the input
@@ -96,8 +102,12 @@ def main():
         except:
             print(f'Camera {camera} Failed')
             break
+
+        # Get hand detection results and draw points
         results = process_image(image)
         img, hand_positions = draw_hand_connections(image, results)
+
+        # Draw the current and previous 25 hand positons
         if hand_positions is not None:
             if len(hand_que) > len(hand_positions):
                 hand_que = []
@@ -121,18 +131,20 @@ def main():
         # Displaying the output
         cv2.imshow("Hand tracker", image)
 
-
+        # Use the n key to switch cameras
         if cv2.waitKey(1) == ord('n'):
             camera += 1
             try:
                 cap = cv2.VideoCapture(camera)
+                # Detect if the new camera works
                 if cap.read()[1] is None:
                     raise Exception()
             except:
+                # Reset to default if failed
                 camera = 0
                 cap = cv2.VideoCapture(camera)
             print(f'Camera {camera}')
-            print('Selecting camera: Hit "n" for NEXT or "q" to EXIT')
+            print('Hit "n" for NEXT or "q" to EXIT')
 
         # Program terminates when q key is pressed
         if cv2.waitKey(1) == ord('q'):
