@@ -50,7 +50,7 @@ def draw_hand_connections(img, results):
 
     # List of hands in frame (testing showed max of 2)
     # - average position, list of positions
-    hand_positions: list[tuple[tuple[int,int],list[int,int]] = []
+    hand_positions = []
     for i in range(len(results.multi_hand_landmarks)):
         handLms = results.multi_hand_landmarks[i]
         handpoints = []
@@ -83,6 +83,24 @@ def draw_hand_connections(img, results):
         hand_positions.append((hand_pos,handpoints))
         # print('Hand Position:', hand_pos)
     return img, hand_positions
+
+def check_camera(camera: int) -> int:
+    # Use the n key to switch cameras
+    if cv2.waitKey(1) == ord('n'):
+        camera += 1
+        try:
+            cap = cv2.VideoCapture(camera)
+            # Detect if the new camera works
+            if cap.read()[1] is None:
+                raise Exception()
+        except:
+            # Reset to default if failed
+            camera = 0
+            cap = cv2.VideoCapture(camera)
+        print(f'Camera {camera}')
+        print('Hit "n" for NEXT or "q" to EXIT')
+            
+    return camera
     
 def main():
     # Set default camera 0 and prefered resolution of 1000px x 1000px
@@ -131,20 +149,7 @@ def main():
         # Displaying the output
         cv2.imshow("Hand tracker", image)
 
-        # Use the n key to switch cameras
-        if cv2.waitKey(1) == ord('n'):
-            camera += 1
-            try:
-                cap = cv2.VideoCapture(camera)
-                # Detect if the new camera works
-                if cap.read()[1] is None:
-                    raise Exception()
-            except:
-                # Reset to default if failed
-                camera = 0
-                cap = cv2.VideoCapture(camera)
-            print(f'Camera {camera}')
-            print('Hit "n" for NEXT or "q" to EXIT')
+        camera = check_camera(camera)
 
         # Program terminates when q key is pressed
         if cv2.waitKey(1) == ord('q'):
