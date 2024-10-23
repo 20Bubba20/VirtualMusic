@@ -23,6 +23,8 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2
+
+from hand_detection import check_camera
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -74,7 +76,7 @@ def run(model: str, num_hands: int,
   recognition_frame = None
   recognition_result_list = []
 
-  def save_result(result: vision.GestureRecognizerResult,
+  def save_result(result, # vision.GestureRecognizerResult, only commented to hide error
                   unused_output_image: mp.Image, timestamp_ms: int):
       global FPS, COUNTER, START_TIME
 
@@ -182,6 +184,7 @@ def run(model: str, num_hands: int,
     if recognition_frame is not None:
         cv2.imshow('gesture_recognition', recognition_frame)
 
+    camera_id, cap = check_camera(camera_id, cap)
     # Stop the program if the ESC key is pressed.
     if cv2.waitKey(1) == 27:
         break

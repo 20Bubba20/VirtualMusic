@@ -84,7 +84,7 @@ def draw_hand_connections(img, results):
         # print('Hand Position:', hand_pos)
     return img, hand_positions
 
-def check_camera(camera: int) -> int:
+def check_camera(camera: int, cap) -> int:
     # Use the n key to switch cameras
     if cv2.waitKey(1) == ord('n'):
         camera += 1
@@ -100,7 +100,7 @@ def check_camera(camera: int) -> int:
         print(f'Camera {camera}')
         print('Hit "n" for NEXT or "q" to EXIT')
             
-    return camera
+    return camera, cap
     
 def main():
     # Set default camera 0 and prefered resolution of 1000px x 1000px
@@ -149,7 +149,7 @@ def main():
         # Displaying the output
         cv2.imshow("Hand tracker", image)
 
-        camera = check_camera(camera)
+        camera, cap = check_camera(camera, cap)
 
         # Program terminates when q key is pressed
         if cv2.waitKey(1) == ord('q'):
