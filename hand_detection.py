@@ -34,7 +34,7 @@ color_dict = [
 ]
 
 # Processing the input image
-def process_image(img):
+def get_hands(img):
     # Converting the input to grayscale
     gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     results = hands.process(gray_image)
@@ -122,7 +122,7 @@ def main():
             break
 
         # Get hand detection results and draw points
-        results = process_image(image)
+        results = get_hands(image)
         img, hand_positions = draw_hand_connections(image, results)
 
         # Draw the current and previous 25 hand positons
