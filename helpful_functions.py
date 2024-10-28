@@ -16,8 +16,10 @@ def check_camera(camera: int, cap: cv2.VideoCapture, next_key: str| int = 'n', p
         tuple[int, cv2.VideoCapture]: The new values for the entered camera id and video capure object
     """
     
-    if change_key is str:
-        change_key = ord(change_key)
+    if next_key is str:
+        next_key = ord(next_key)
+    if previous_key is str:
+        previous_key = ord(previous_key)
     
     key = cv2.waitKey(1)
     if key == next_key:
@@ -42,11 +44,3 @@ def check_camera(camera: int, cap: cv2.VideoCapture, next_key: str| int = 'n', p
     print('Go to NEXT camere using "n" or EXIT using ESC or "q"')
             
     return camera, cap
-
-def function(variable: int = 1):
-    """_summary_
-
-    Args:
-        variable (int, optional): _description_. Defaults to 1.
-    """
-    pass

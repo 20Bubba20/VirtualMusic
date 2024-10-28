@@ -5,11 +5,11 @@ from helpful_functions import check_camera
 
 # Global Variables
 # - Media Pipe setup
-print("Setting Global variables")
+# print("Setting Global variables")
 mpHands = mp.solutions.hands
 hands = mpHands.Hands()
 mpDraw = mp.solutions.drawing_utils
-print("Done: Setting Global variables")
+# print("Done: Setting Global variables")
 
 
 def detect_hands(image, resolution: tuple[int, int]) -> list:
@@ -62,6 +62,44 @@ def detect_hands(image, resolution: tuple[int, int]) -> list:
         hand_positions.append((hand_pos, handpoints, hand_lms))
         # print('Hand Position:', hand_pos)
     
+    return hand_positions
+
+def get_points_theremin(hand_positions: list[tuple[tuple, list[tuple[int, int]], list]]) -> list[tuple[int, int]]:
+    """Take a tuple of hand positions and return only the ones needed for the theremin
+
+    Args:
+        hand_positions (list[tuple[tuple, list[tuple[int, int]], list]]): List containing all of the hand information
+
+    Returns:
+        list[tuple[int, int]]: list of points to be used in the processing for the theremin
+    """
+    
+    hand_points = []
+    for hand in hand_positions:
+        hand_points.append(hand[0])
+    return hand_points
+    pass
+
+def get_points_piano(hand_positions: list[tuple[tuple, list[tuple[int, int]], list]]) -> list[tuple[int, int]]:
+    """Take a tuple of hand positions and return only the ones needed for the piano
+
+    Args:
+        hand_positions (list[tuple[tuple, list[tuple[int, int]], list]]): List containing all of the hand information
+
+    Returns:
+        list[tuple[int, int]]: list of points to be used in the processing for the theremin
+    """
+    # Points given by https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker
+    required_points = [4, 8, 12, 16, 20]
+    hand_points = []
+    for hand in hand_positions:
+        center = hand[0]
+        finger_tips = []
+        for id, point in enumerate(hand[1]):
+            if id not in required_points:
+                continue
+            finger_tips.append(point)
+        hand_points.append(hand[0])
     return hand_positions
 
 def draw_hands(img, hand_positions: list[tuple]):
