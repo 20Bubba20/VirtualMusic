@@ -2,6 +2,12 @@
 
 Team Members: Jerron Pierro, Andra Williams, Morrell Waters, Cole Nardini
 
+## Prerequisites
+Python 
+MediaPipe
+OpenCV-Python
+imutils
+
 ## Testing Directions
 
 1. Download repository
