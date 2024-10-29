@@ -6,7 +6,7 @@ from cv2_enumerate_cameras import enumerate_cameras
 #     print(f'{camera_info.index}: {camera_info.name}')
 
 
-def select_camera():
+def select_camera_cli():
    """
    Allows the user to select a camera from a list of available cameras.
    
@@ -43,8 +43,9 @@ def select_camera():
            print("Invalid input. Please enter a number.")
 
 
+
 if __name__ == "__main__":
-   camera_info = select_camera()
+   camera_info = select_camera_cli()
    if camera_info is not None:
        cap = cv2.VideoCapture(camera_info.index, camera_info.backend)
 

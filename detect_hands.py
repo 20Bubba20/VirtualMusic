@@ -65,7 +65,7 @@ def detect_hands(image, resolution: tuple[int, int]) -> list:
     return hand_positions
 
 def get_points_theremin(hand_positions: list[tuple[tuple, list[tuple[int, int]], list]]) -> list[tuple[int, int]]:
-    """Take a tuple of hand positions and return only the ones needed for the theremin
+    """Take a list of hand positions and return only the ones needed for the theremin
 
     Args:
         hand_positions (list[tuple[tuple, list[tuple[int, int]], list]]): List containing all of the hand information
@@ -78,29 +78,50 @@ def get_points_theremin(hand_positions: list[tuple[tuple, list[tuple[int, int]],
     for hand in hand_positions:
         hand_points.append(hand[0])
     return hand_points
-    pass
 
 def get_points_piano(hand_positions: list[tuple[tuple, list[tuple[int, int]], list]]) -> list[tuple[int, int]]:
-    """Take a tuple of hand positions and return only the ones needed for the piano
+    """Take a list of hand positions and return only the ones needed for the piano
 
     Args:
         hand_positions (list[tuple[tuple, list[tuple[int, int]], list]]): List containing all of the hand information
 
     Returns:
-        list[tuple[int, int]]: list of points to be used in the processing for the theremin
+        list[tuple[int, int]]: list of points to be used in the processing for the piano
     """
     # Points given by https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker
     required_points = [4, 8, 12, 16, 20]
-    hand_points = []
+    hand_points: list[tuple[int,int]] = []
     for hand in hand_positions:
         center = hand[0]
+        hand_points.append(center)
         finger_tips = []
         for id, point in enumerate(hand[1]):
             if id not in required_points:
                 continue
             finger_tips.append(point)
-        hand_points.append(hand[0])
-    return hand_positions
+        hand_points.extend(finger_tips)
+    return hand_points
+
+def get_points_guitar(hand_positions: list[tuple[tuple, list[tuple[int, int]], list]]) -> list[tuple[int, int]]:
+    """Take a list of hand positions and return only the ones needed for the guitar
+
+    Args:
+        hand_positions (list[tuple[tuple, list[tuple[int, int]], list]]): List containing all of the hand information
+
+    Returns:
+        list[tuple[int, int]]: list of points to be used in the processing for the guitar
+    """
+    # Points given by https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker
+    required_points = [4, 8, 12, 16, 20]
+    hand_points: list[tuple[int,int]] = []
+    for hand in hand_positions:
+        finger_tips = []
+        for id, point in enumerate(hand[1]):
+            if id not in required_points:
+                continue
+            finger_tips.append(point)
+        hand_points.extend(finger_tips)
+    return hand_points
 
 def draw_hands(img, hand_positions: list[tuple]):
     """Draw the hands on the source image
