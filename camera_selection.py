@@ -42,11 +42,9 @@ def select_camera_cli():
        except ValueError:
            print("Invalid input. Please enter a number.")
 
-
-
-if __name__ == "__main__":
-   camera_info = select_camera_cli()
-   if camera_info is not None:
+def main():
+    camera_info = select_camera_cli()
+    if camera_info is not None:
        cap = cv2.VideoCapture(camera_info.index, camera_info.backend)
 
 
@@ -65,4 +63,7 @@ if __name__ == "__main__":
 
        cap.release()
        cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+   main()
    pass

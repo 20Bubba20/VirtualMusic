@@ -44,3 +44,17 @@ def check_camera(camera: int, cap: cv2.VideoCapture, next_key: str| int = 'n', p
     print('Go to NEXT camere using "n" or EXIT using ESC or "q"')
             
     return camera, cap
+
+def getFilePath():
+    """Return the path for the current file. Also handles different operating systems.
+
+    Returns:
+        str: String of the file path for the file
+    """
+    import os
+    operating_system = os.name
+
+    this_file = '__file__' if operating_system == 'nt' else '__name__'
+
+    cwd = os.path.realpath(os.path.dirname(this_file))
+    return cwd
