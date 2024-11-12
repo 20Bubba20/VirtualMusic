@@ -26,6 +26,11 @@ def detect_hands(image, resolution: tuple[int, int]) -> list:
             * CV2 object representing the hand - only used for testing purposes
     """
     
+    try:
+        image = imutils.resize(image, width=resolution[0], height=resolution[1])
+    except:
+        raise Exception ("Detect Hands Failed - Image Resizing")
+    
     # Converting the input to grayscale
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = hands.process(gray_image)
@@ -75,8 +80,9 @@ def get_points_theremin(hand_positions: list[tuple[tuple, list[tuple[int, int]],
     """
     
     hand_points = []
-    for hand in hand_positions:
-        hand_points.append(hand[0])
+    if hand_positions is not None:
+        for hand in hand_positions:
+            hand_points.append(hand[0])
     return hand_points
 
 def get_points_piano(hand_positions: list[tuple[tuple, list[tuple[int, int]], list]]) -> list[tuple[int, int]]:
@@ -91,15 +97,16 @@ def get_points_piano(hand_positions: list[tuple[tuple, list[tuple[int, int]], li
     # Points given by https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker
     required_points = [4, 8, 12, 16, 20]
     hand_points: list[tuple[int,int]] = []
-    for hand in hand_positions:
-        center = hand[0]
-        hand_points.append(center)
-        finger_tips = []
-        for id, point in enumerate(hand[1]):
-            if id not in required_points:
-                continue
-            finger_tips.append(point)
-        hand_points.extend(finger_tips)
+    if hand_positions is not None:
+        for hand in hand_positions:
+            center = hand[0]
+            hand_points.append(center)
+            finger_tips = []
+            for id, point in enumerate(hand[1]):
+                if id not in required_points:
+                    continue
+                finger_tips.append(point)
+            hand_points.extend(finger_tips)
     return hand_points
 
 def get_points_guitar(hand_positions: list[tuple[tuple, list[tuple[int, int]], list]]) -> list[tuple[int, int]]:
@@ -114,13 +121,14 @@ def get_points_guitar(hand_positions: list[tuple[tuple, list[tuple[int, int]], l
     # Points given by https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker
     required_points = [4, 8, 12, 16, 20]
     hand_points: list[tuple[int,int]] = []
-    for hand in hand_positions:
-        finger_tips = []
-        for id, point in enumerate(hand[1]):
-            if id not in required_points:
-                continue
-            finger_tips.append(point)
-        hand_points.extend(finger_tips)
+    if hand_positions is not None:
+        for hand in hand_positions:
+            finger_tips = []
+            for id, point in enumerate(hand[1]):
+                if id not in required_points:
+                    continue
+                finger_tips.append(point)
+            hand_points.extend(finger_tips)
     return hand_points
 
 def draw_hands(img, hand_positions: list[tuple]):
@@ -156,6 +164,8 @@ def draw_hands(img, hand_positions: list[tuple]):
         (250, 228, 112),
         (250, 230, 119)
     ]
+    if hand_positions is None:
+        return img
     
     for hand in hand_positions:
         hand_pos = hand[0]
@@ -190,10 +200,6 @@ def main():
     cap = cv2.VideoCapture(camera)
     while True:
         success, image = cap.read()
-        try:
-            image = imutils.resize(image, width=resolution[0], height=resolution[1])
-        except:
-            raise Exception ("Detect Hands Failed - Image Resizing")
     
         hand_positions = detect_hands(image, resolution)
         

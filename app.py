@@ -2,7 +2,7 @@ import cv2
 import mediapipe as mp
 
 from camera_selection import select_camera_cli
-from detect_gesture import read_gesture, print_result, options
+from detect_gesture import read_gesture, print_result
 from detect_hands import get_points_theremin, detect_hands, draw_hands
 
 BaseOptions = mp.tasks.BaseOptions
@@ -15,7 +15,9 @@ def main():
     camera = select_camera_cli()
     print(f'You have selected {camera.name}')
     
+    print('Generate capture')
     capture = cv2.VideoCapture(camera.index, camera.backend)
+    print('Capture Generated')
     
     
     timestamp = 0
@@ -24,10 +26,10 @@ def main():
     
     
     print("Initialize gesture detection.")
-    # options = GestureRecognizerOptions(
-    #     base_options=BaseOptions(model_asset_path='gesture_recognizer.task'),
-    #     running_mode=VisionRunningMode.LIVE_STREAM,
-    #     result_callback=print_result)
+    options = GestureRecognizerOptions(
+        base_options=BaseOptions(model_asset_buffer=open('gesture_recognizer.task', "rb").read()),
+        running_mode=VisionRunningMode.LIVE_STREAM,
+        result_callback=print_result)
     with GestureRecognizer.create_from_options(options) as recognizer:
         print("Gesture detection initialized.")
         while capture.isOpened():
@@ -38,10 +40,11 @@ def main():
             match state:
                 case 'hand':
                     hands = detect_hands(frame, resolution)
-                    theremin_points = get_points_theremin(hands)
+                    if hands is not None:
+                        theremin_points = get_points_theremin(hands)
                     output_image = draw_hands(frame, hands)
                     cv2.imshow("Hand tracker", output_image)
-                    # Anything that sets the state to gesture detection (temporarily, it is every 20 seconds)
+                    # Anything that sets the state to gesture detection (temporarily, it is every 20 cycles)
                     if timestamp % 20 == 0:
                         print("Switching to gesture detection.")
                         state = 'gesture'
