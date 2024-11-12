@@ -1,3 +1,4 @@
 OpenCV-Python
 MediaPipe
 imutils
+cv2-enumerate-cameras
