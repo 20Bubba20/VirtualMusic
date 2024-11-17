@@ -45,23 +45,23 @@ def detect_hands(image, resolution: tuple[int, int]) -> list:
     for i in range(len(results.multi_hand_landmarks)):
         hand_lms = results.multi_hand_landmarks[i]
         handpoints = []
+        sum_x = 0
+        sum_y = 0
         for id, lm in enumerate(hand_lms.landmark):
             h, w, c = image.shape
 
             # Finding the coordinates of each landmark
             cx, cy = int(lm.x * w), int(lm.y * h)
+            sum_x += cx
+            sum_y += cy
 
             # Printing each landmark ID and coordinates
             # on the terminal
             handpoints.append((id, cx, cy))
 
         # Calculate hand position by averageing all of the hand points
-        sum_x = 0
-        sum_y = 0
-        for id, x, y in handpoints:
-            sum_x += x
-            sum_y += y
-        hand_pos = (int(sum_x/len(handpoints)), int(sum_y/len(handpoints)))
+        
+        hand_pos = (int((sum_x/len(handpoints))*w), int((sum_y/len(handpoints))*h))
         
         
         hand_positions.append((hand_pos, handpoints, hand_lms))
@@ -168,14 +168,16 @@ def draw_hands(img, hand_positions: list[tuple]):
         return img
     
     for hand in hand_positions:
+        h, w, c = img.shape
         hand_pos = hand[0]
+        hand_points = hand[1]
         hand_lms = hand[2]
         
-        for id, lm in enumerate(hand_lms.landmark):
-            h, w, c = img.shape
+        for id, point in enumerate(hand_points):
+            
 
             # Finding the coordinates of each landmark
-            cx, cy = int(lm.x * w), int(lm.y * h)
+            cx, cy = int(point[0] * w), int(point[1] * h)
 
             # Creating a circle around each landmark
             cv2.circle(img, (cx, cy), 10, color_dict[id],

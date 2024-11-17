@@ -20,7 +20,7 @@ cv2-enumerate-cameras
 
 ## Milestone 1
 
-Google Mediapipe integrated. 
+Google Mediapipe integrated.  
 
    - Gesture detection and hand tracking both function but do not connect to much else yet.
 
