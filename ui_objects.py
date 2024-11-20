@@ -99,6 +99,8 @@ class UIEllipse(UIShape):
             abs(self.dy_size - self.dy)
         )
         cv.ellipse(img, center, axis, self.angle, self.start_angle, self.end_angle, self.color, thickness=self.thickness)
+        print(f'Ellipse from ({self.dx+parent_pos[0]}, {self.dy+parent_pos[1]}) to ({self.dx_size+parent_pos[0]}, {self.dy_size+parent_pos[1]})')               
+        
         
     def range(self):
         center = ((self.dx + self.dx_size)/2, (self.dy + self.dy_size)/2)
@@ -128,6 +130,7 @@ class UIRect(UIShape):
         
     def draw(self, img, parent_pos):
         cv.rectangle(img, (parent_pos[0] + self.dx, parent_pos[0] + self.dy), (parent_pos[0] + self.dx_end, parent_pos[0] + self.dy_end), self.color, self.thickness)
+        print(f'Rectangle from ({self.dx+parent_pos[0]}, {self.dy+parent_pos[1]}) to ({self.dx_end+parent_pos[0]}, {self.dy_end+parent_pos[1]})')
         
     def range(self):
         self.x_min= min(self.dx,self.dx_end)
@@ -142,7 +145,7 @@ class UILine(UIRect):
         
     def draw(self, img, parent_pos):
         cv.line(img, (parent_pos[0] + self.dx, parent_pos[0] + self.dy), (parent_pos[0] + self.dx_end, parent_pos[0] + self.dy_end), self.color, self.thickness)
-                
+        print(f'Line from ({self.dx+parent_pos[0]}, {self.dy+parent_pos[1]}) to ({self.dx_end+parent_pos[0]}, {self.dy_end+parent_pos[1]})')               
         
 
 class UIText(UIShape):
@@ -159,6 +162,10 @@ class UIText(UIShape):
     
     def set_font(self, font = cv.FONT_HERSHEY_SIMPLEX):
         self.font = font
+        
+    def draw(self, img, parent_pos):
+        cv.putText(img, self.text, (parent_pos[0] + self.dx, parent_pos[1] + self.dy), self.font, self.font_size, self.color, self.thickness, cv.LINE_AA)
+        print(f'Text at {(parent_pos[0] + self.dx, parent_pos[1] + self.dy)}')
     pass 
 
 class UI_Element:
@@ -185,8 +192,10 @@ class UI_Element:
         return (self.x_max - self.x_min, self.y_max - self.y_min)
     
     def draw(self, img):
+        print(f'{self.name} ({self.x, self.y}):')
         for shape in self.draw_list:
             shape.draw(img,(self.x, self.y))
+            
         pass        
     
     def check_within(self, point_x, point_y):
