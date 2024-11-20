@@ -4,13 +4,13 @@ from ui_objects import *
 
 scale = (16, 9)
 k = 80
-resolution = (k*scale[0],k*scale[1])
+resolution = (k*scale[0],k*scale[1]) #(1280, 720)
 # print(resolution)
-PrimaryColor = (18, 96, 132)
+PrimaryColor = (132, 96, 18)
 TitleBig = UI_Element(
     name = 'title',
-    x = int((resolution[0]/2)),
-    y = 120,
+    x = 20,
+    y = 50,
     draw_list=[
         UIText((0, 0, 0), 0, 0, 'Virtual Music', 2, 4),
         UIEllipse((0,0,0), 0,0, 3, 3, -1)
@@ -19,18 +19,19 @@ TitleBig = UI_Element(
 
 PracticeButton = UI_Element(
     name = 'practice',
-    x = int((resolution[0]/2))-50,
-    y = 155,
+    x = 20,
+    y = 200,
     draw_list=[
-        UIRect(PrimaryColor, 0,0, 300, 20, -1),
-        UIRect((0,0,0), 0,0, 300, 20, -1),
-        UIText((255,255,255), 15, 15, 'Practice', 1, 2)
+        UIRect(PrimaryColor, 0,0, 160, 45, -1),
+        UIRect((0,0,0), 0,0, 160, 45, 1),
+        UIText((255,255,255), 10, 40, 'Practice', 1, 2)
     ]
 )
 
 
 HomeScene = [
-    TitleBig
+    TitleBig,
+    PracticeButton
 ]
 
 
