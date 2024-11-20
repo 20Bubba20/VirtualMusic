@@ -40,12 +40,8 @@ while True:
     button.change_position(button.x + dx, button.y + dy)
     if button.x_max >= resolution[0] or button.x_min <= 0:
         dx = dx * -1
-        # button.change_position(button.x + dx*10, button.y)
-        print("button change x direction")
     if button.y_max >= resolution[1] or button.y_min <= 0:
         dy = dy * -1
-        # button.change_position(button.x, button.y + dy*10)
-        print("button change y direction")
     if button.collision(center.x,center.y):
         print("In Center")
     if cv2.waitKey(1) == ord('q') or cv2.waitKey(1) == 27:

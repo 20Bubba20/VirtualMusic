@@ -42,10 +42,10 @@ def main():
     duration = 0.1   # in seconds, may be float
     f = 440.0        # sine frequency, Hz, may be float
     # Open stream
-    stream = p.open(format=pyaudio.paFloat32,
-                    channels=1,
-                    rate=fs,
-                    output=True)
+    # stream = p.open(format=pyaudio.paFloat32,
+    #                 channels=1,
+    #                 rate=fs,
+    #                 output=True)
 
     
     print("Initialize gesture detection.")
@@ -72,16 +72,17 @@ def main():
                         # y -> volume
                         volume = np.interp(y,[0,resolution[1]],[0.10, 0.80])
                         
-                        samples = generateSample(frequency, fs, duration)
-                        stream.write(volume*samples)
+                        # samples = generateSample(frequency, fs, duration)
+                        # stream.write(volume*samples)
                         
                     output_image = draw_hands(frame, hands)
+
                     cv2.imshow("Hand tracker", output_image)
                     # Anything that sets the state to gesture detection (temporarily, it is every 20 cycles)
-                    # if timestamp % 20 == 0:
-                    #     print("Switching to gesture detection.")
-                    #     state = 'gesture'
-                    # pass
+                    if timestamp % 20 == 0:
+                        print("Switching to gesture detection.")
+                        state = 'gesture'
+                    pass
                 case 'gesture':
                     gesture_list = read_gesture(frame, recognizer, timestamp)
                     print(gesture_list)
@@ -97,7 +98,7 @@ def main():
     
     capture.release()
     cv2.destroyAllWindows()
-    stream.close()
+    # stream.close()
 
     p.terminate()
     pass
