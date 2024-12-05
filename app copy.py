@@ -36,6 +36,7 @@ def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
     
     background = np.full((resolution[1],resolution[0],3), 255, np.uint8)
     ret, img = capture.read()
+    img = cv2.flip(img, 1)
     hands = detect_hands(img, resolution)
     activeScene.render(background)
     if hands is not None:
@@ -66,24 +67,34 @@ def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
 
 def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
     ret, img = capture.read()
+    img = cv2.flip(img, 1)
     background = np.full((resolution[1],resolution[0],3), 255, np.uint8)
     hands = detect_hands(img, resolution)
-    activeScene.contents.extend(generateCameraSelect())
+    if len(activeScene.contents) < 5:
+        activeScene.contents.extend(generateCameraSelect())
     activeScene.render(background)
     if hands is not None:
         home_points = get_points_center(hands)
         hovered_objects = activeScene.check_points(home_points)
         for hand in home_points:
             cv2.circle(background, hand, 10, PrimaryColor, cv2.FILLED)
-            
+        print(hovered_objects)
         if timestamp - activeScene.scene_start > bufferTime and 'home' in hovered_objects:
             gesture_list = read_gesture(img, recognizer, timestamp)
-            if 'Closed_Fist' in gesture_list:
+            print(gesture_list)
+            gestures = []
+            for gesture in gesture_list:
+                gestures.append(gesture[3])
+            if 'Closed_Fist' in gestures:
                 activeScene = HomeScene
                 activeScene.scene_start = timestamp                
         elif timestamp - activeScene.scene_start > bufferTime and 'exit' in hovered_objects:
             gesture_list = read_gesture(img, recognizer, timestamp)
-            if 'Closed_Fist' in gesture_list:
+            print(gesture_list)
+            gestures = []
+            for gesture in gesture_list:
+                gestures.append(gesture[3])
+            if 'Closed_Fist' in gestures:
                 cv2.imshow(title, background)
                 capture.release()
                 cv2.destroyAllWindows()  
@@ -96,12 +107,17 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
                     break
             if camera_object is not None:
                 gesture_list = read_gesture(img, recognizer, timestamp)
-                if 'Closed_Fist' in gesture_list:
+                print(gesture_list)
+                gestures = []
+                for gesture in gesture_list:
+                    gestures.append(gesture[3])
+                if 'Closed_Fist' in gestures:
                     print(camera_object)
                     camera = camera_object.split('-')[1]
                     index = camera.split(',')[0]
                     backend = camera.split(',')[1]
-                    capture = cv2.VideoCapture(index, backend)
+                    print(index, backend)
+                    capture = cv2.VideoCapture(int(index), int(backend))
                     activeScene.scene_start = timestamp 
         
             pass
@@ -111,7 +127,7 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
 
 def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scene:
     ret, img = capture.read()
-                
+    img = cv2.flip(img, 1)            
     hands = detect_hands(img, resolution)
     fs = 44100       # sampling rate, Hz, must be integer
     duration = 0.1   # in seconds, may be float
@@ -150,7 +166,7 @@ def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scen
     return activeScene
 
 def main():
-    activeScene = HomeScene
+    activeScene = SettingsScene
     capture = cv2.VideoCapture(0)
     
     timestamp = 0

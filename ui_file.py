@@ -20,6 +20,15 @@ TitleBig = UI_Element(
     ]
 )
 
+Cameras = UI_Element(
+    name = 'cameras',
+    x = int(resolution[0] / 2 - 200),
+    y = 200,
+    draw_list=[
+        UIText((0, 0, 0), 0, 0, 'Select Camera', 2, 4)
+    ]
+)
+
 TitleSmall = UI_Element(
     name = 'title',
     x = 150,
@@ -40,6 +49,15 @@ PracticeButton = UI_Element(
     ]
 )
 
+ExitInstruct = UI_Element(
+    name='exit',
+    x=int(resolution[0] / 2 - 300),
+    y=int(resolution[1] - 50),
+    draw_list=[
+        UIText(Black, 0, 0, 'Press "Escape" or the "Q" key to exit.', 1, 2)
+    ]
+)
+
 SettingsButton = UI_Element(
     name='settings',
     x=int(resolution[0]-210),
@@ -47,6 +65,16 @@ SettingsButton = UI_Element(
     draw_list=[
         UIRect(PrimaryColor, 0, 0, 130, 34, 1),
         UIText(PrimaryColor, 2, 28, 'Settings', 1, 2)
+    ]
+)
+
+ExitButton = UI_Element(
+    name='exit',
+    x=int(resolution[0]-210),
+    y=int(15),
+    draw_list=[
+        UIRect(PrimaryColor, 0, 0, 130, 34, 1),
+        UIText(PrimaryColor, 2, 28, 'Exit', 1, 2)
     ]
 )
 
@@ -74,7 +102,8 @@ HomeScene = Scene(
     elements=[
         TitleBig,
         PracticeButton,
-        SettingsButton
+        SettingsButton,
+        ExitInstruct
     ]
 )
 
@@ -82,7 +111,9 @@ SettingsScene = Scene(
     name = 'settings',
     elements=[
         TitleSmall,
-        HomeButton
+        Cameras,
+        HomeButton,
+        ExitButton
     ]
 )
 
@@ -99,7 +130,7 @@ ThereminPractice = Scene(
 def generateCameraSelect():
     available_cameras = enumerate_cameras()
 
-    listStart = (int(resolution[0] / 2 - 200), 200)
+    listStart = (int(resolution[0] / 2 - 200), 250)
     if not available_cameras:
         NoCameras = UI_Element(
             name = 'no_camera',
@@ -119,15 +150,23 @@ def generateCameraSelect():
     camera_list = []
     for id, camera_info in enumerate(available_cameras):
         print(f'{id}: {camera_info.name}')
+        try:
+            capture = cv2.VideoCapture(camera_info.index, camera_info.backend)
+            ret, img = capture.read()
+            if not ret:
+                raise Exception()
+        except:
+            continue
         cameraButton = UI_Element(
-            name = f'{camera_info.index},{camera_info.backend}',
+            name = f'camera-{camera_info.index},{camera_info.backend}',
             x = listStart[0],
             y = listStart[1] + offset,
             draw_list=[
-                UIRect(PrimaryColor, 0, 0, 150, 34, -1),
+                UIRect(PrimaryColor, 0, 0, 150, 50, -1),
                 UIText(White, 2, 28, camera_info.name, 1, 2)
             ]
         )
         camera_list.append(cameraButton)
-        offset = offset + 40
+        offset = offset + 60
+    return camera_list
     pass

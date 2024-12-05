@@ -28,8 +28,8 @@ def detect_hands(image, resolution: tuple[int, int]) -> list:
     
     try:
         image = imutils.resize(image, width=resolution[0], height=resolution[1])
-    except:
-        raise Exception ("Detect Hands Failed - Image Resizing")
+    except Exception as err:
+        raise Exception (f"Detect Hands Failed - Image Resizing - {err}")
     
     # Converting the input to grayscale
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
