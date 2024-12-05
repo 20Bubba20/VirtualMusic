@@ -81,8 +81,8 @@ class UIEllipse(UIShape):
         self.angle = angle
         self.start_angle = start_angle
         self.end_angle = end_angle
-        self.range()
         super().__init__('ellipse', color, dx, dy, thickness)
+        self.range()
 
     def draw(self,img, parent_pos):
         center = (int((self.dx_size + self.dx)/2) + parent_pos[0], int((self.dy_size + self.dy)/2) + parent_pos[0])
@@ -92,8 +92,8 @@ class UIEllipse(UIShape):
         )
         cv2.ellipse(img, center, axis, self.angle, self.start_angle, self.end_angle,
                     self.color, thickness=self.thickness)
-        print(f'Ellipse from ({self.dx+parent_pos[0]}, {self.dy+parent_pos[1]}) to \
-        ({self.dx_size+parent_pos[0]}, {self.dy_size+parent_pos[1]})')
+        # print(f'Ellipse from ({self.dx+parent_pos[0]}, {self.dy+parent_pos[1]}) to \
+        # ({self.dx_size+parent_pos[0]}, {self.dy_size+parent_pos[1]})')
         
     def range(self):
         center = ((self.dx + self.dx_size)/2, (self.dy + self.dy_size)/2)
@@ -127,8 +127,8 @@ class UIRect(UIShape):
     def draw(self, img, parent_pos):
         cv2.rectangle(img, ((parent_pos[0] + self.x_min), (parent_pos[1] + self.y_min)),
                       ((parent_pos[0] + self.x_max), (parent_pos[1] + self.y_max)), self.color, self.thickness)
-        print(f'Rectangle from ({self.x_min+parent_pos[0]}, {self.y_min+parent_pos[1]}) to \
-        ({self.x_max+parent_pos[0]}, {self.y_max+parent_pos[1]})')
+        # print(f'Rectangle from ({self.x_min+parent_pos[0]}, {self.y_min+parent_pos[1]}) to \
+        # ({self.x_max+parent_pos[0]}, {self.y_max+parent_pos[1]})')
         
 class UILine(UIRect):
     def __init__(self, color, dx_start, dy_start, dx_end, dy_end, thickness):
@@ -138,8 +138,8 @@ class UILine(UIRect):
     def draw(self, img, parent_pos):
         cv2.line(img, (parent_pos[0] + self.dx, parent_pos[0] + self.dy),
                  (parent_pos[0] + self.dx_end, parent_pos[0] + self.dy_end), self.color, self.thickness)
-        print(f'Line from ({self.dx+parent_pos[0]}, {self.dy+parent_pos[1]}) to \
-        ({self.dx_end+parent_pos[0]}, {self.dy_end+parent_pos[1]})')
+        # print(f'Line from ({self.dx+parent_pos[0]}, {self.dy+parent_pos[1]}) to \
+        # ({self.dx_end+parent_pos[0]}, {self.dy_end+parent_pos[1]})')
 
 class UIText(UIShape):
     def __init__(self, color, dx, dy, text, scale, thickness ):
@@ -158,7 +158,7 @@ class UIText(UIShape):
     def draw(self, img, parent_pos):
         cv2.putText(img, self.text, ((parent_pos[0] + self.dx), (parent_pos[1] + self.dy)),
                     self.font, self.font_size, self.color, self.thickness, cv2.LINE_AA)
-        print(f'Text at {(parent_pos[0] + self.dx, parent_pos[1] + self.dy)}')
+        # print(f'Text at {(parent_pos[0] + self.dx, parent_pos[1] + self.dy)}')
     pass 
 
 class UI_Element:
@@ -185,7 +185,7 @@ class UI_Element:
         return self.x_max - self.x_min, self.y_max - self.y_min
     
     def draw(self, img):
-        print(f'{self.name} ({self.x, self.y}):')
+        # print(f'{self.name} ({self.x, self.y}):')
         for shape in self.draw_list:
             shape.draw(img,(self.x, self.y))
 
@@ -215,22 +215,21 @@ class Scene:
     def __init__(self, name, elements: list[UI_Element]):
         self.name = name
         self.contents = elements
+        self.scene_start = 0
         pass
     
     def render(self, background):
         for element in self.contents:
             element.draw(background)
             
-    def check_points(self, point_list: list[tuple[int, int]] | tuple[int, int]) -> list[str]:
-        if point_list is tuple:
-            point_list = [point_list]
+    def check_points(self, point_list: list[tuple[int, int]]) -> list[str]:
             
         selected = []
         for element in self.contents:
             for point in point_list:
                 if element.name in selected:
                     break
-                if element.check_within(*point):
+                if element.check_within(point[0],point[1]):
                     selected.append(element.name)
                 
         return selected

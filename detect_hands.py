@@ -61,7 +61,7 @@ def detect_hands(image, resolution: tuple[int, int]) -> list:
 
         # Calculate hand position by averageing all of the hand points
         
-        hand_pos = (int((sum_x/len(handpoints))*w), int((sum_y/len(handpoints))*h))
+        hand_pos = (int((sum_x/len(handpoints))), int((sum_y/len(handpoints))))
         
         
         hand_positions.append((hand_pos, handpoints, hand_lms))
@@ -69,14 +69,14 @@ def detect_hands(image, resolution: tuple[int, int]) -> list:
     
     return hand_positions
 
-def get_points_theremin(hand_positions: list[tuple[tuple, list[tuple[int, int]], list]]) -> list[tuple[int, int]]:
-    """Take a list of hand positions and return only the ones needed for the theremin
+def get_points_center(hand_positions: list[tuple[tuple, list[tuple[int, int]], list]]) -> list[tuple[int, int]]:
+    """Take a list of hand positions and return only the center
 
     Args:
         hand_positions (list[tuple[tuple, list[tuple[int, int]], list]]): List containing all of the hand information
 
     Returns:
-        list[tuple[int, int]]: list of points to be used in the processing for the theremin
+        list[tuple[int, int]]: list of points to be used
     """
     
     hand_points = []

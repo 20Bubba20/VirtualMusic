@@ -40,6 +40,7 @@ ExitInstruct = UI_Element(
     ]
 )
 
+
 def mouse_click(event, x, y, flags, param):
     global is_exit_clicked
     # Click practice button with LMB
