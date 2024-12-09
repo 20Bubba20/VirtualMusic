@@ -162,12 +162,13 @@ def generateCameraSelect():
     offset = 0
     camera_list = []
     for id, camera_info in enumerate(available_cameras):
-        print(f'{id}: {camera_info.name}')
         try:
             capture = cv2.VideoCapture(camera_info.index, camera_info.backend)
             ret, img = capture.read()
             if not ret:
                 raise Exception()
+            capture.release()
+            print(f'{id}: {camera_info.name}')
         except:
             continue
         cameraButton = UI_Element(
@@ -175,7 +176,7 @@ def generateCameraSelect():
             x = listStart[0],
             y = listStart[1] + offset,
             draw_list=[
-                UIRect(PrimaryColor, 0, 0, 200, 50, -1),
+                UIRect(PrimaryColor, 0, 0, 400, 50, -1),
                 UIText(White, 25, 35, camera_info.name, 1, 2)
             ]
         )

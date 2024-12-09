@@ -37,7 +37,7 @@ def generateSample(frequency, fs, duration):
 # Home Scene
 def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
     background = np.full((resolution[1], resolution[0], 3), 255, np.uint8)
-    ret, img = capture.read()
+    _, img = capture.read()
     img = cv2.flip(img, 1)
     hands = detect_hands(img, resolution)
     activeScene.render(background)
@@ -83,13 +83,17 @@ def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
 # Settings Scene
 def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
     ret, img = capture.read()
+    # print(capture.getBackendName(), ret, img is None)
     img = cv2.flip(img, 1)
     background = np.full((resolution[1], resolution[0], 3), 255, np.uint8)
-    hands = detect_hands(img, resolution)
+    hands = None
+    try:
+        hands = detect_hands(img, resolution)
+    except Exception as err:
+        #print(err)
+        pass
     # time_entered = -1
 
-    if len(activeScene.contents) < 6:
-        activeScene.contents.extend(generateCameraSelect())
     activeScene.render(background)
 
     # Determine where the hands are & what gestures
@@ -127,7 +131,7 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
                 cv2.imshow(title, background)
                 capture.release()
                 cv2.destroyAllWindows()
-                return activeScene
+                return activeScene, None
 
         # Camera selection
         elif timestamp - activeScene.scene_start > bufferTime:
@@ -159,7 +163,7 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
 
 # Theremin Practice Scene
 def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scene:
-    ret, img = capture.read()
+    _, img = capture.read()
     img = cv2.flip(img, 1)
     hands = detect_hands(img, resolution)
     fs = 44100  # sampling rate, Hz, must be integer
@@ -215,7 +219,7 @@ def countdownLoader(newScene: Scene, timestamp, time_entered):
         time_diff = timestamp - time_entered
 
         # Text on the UI of how long until selection
-        counting = UIText((0, 0, 0), 0, 0, str(time_diff), 2, 4)
+        counting = UIText(Black, 0, 0, str(time_diff), 2, 4)
 
         if time_diff > bufferTime:
             activeScene = newScene
@@ -224,8 +228,17 @@ def countdownLoader(newScene: Scene, timestamp, time_entered):
 
 
 def main():
+    if len(SettingsScene.contents) < 6:
+        SettingsScene.contents.extend(generateCameraSelect())
+    
     activeScene = SettingsScene
-    capture = cv2.VideoCapture(0)
+    camera = 0
+    while True:
+        capture = cv2.VideoCapture(camera)
+        ret, _ = capture.read()
+        if ret:
+            break
+        camera = camera + 1
 
     timestamp = 0
     state = 'hand'
