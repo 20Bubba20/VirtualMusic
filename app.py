@@ -1,4 +1,6 @@
 # Sound Libraries
+import time
+
 import pyaudio
 import numpy as np
 
@@ -6,7 +8,7 @@ import numpy as np
 import cv2
 import mediapipe as mp
 
-# Custiom functions and objects
+# Custom functions and objects
 from camera_selection import select_camera_cli
 from detect_gesture import read_gesture, print_result
 from detect_hands import get_points_center, detect_hands, draw_hands
@@ -26,9 +28,11 @@ resolution = (scale * aspect_ratio[0], scale * aspect_ratio[1])  # (1280, 720)
 blank_background = np.full((resolution[1], resolution[0], 3), 255, np.uint8)
 bufferTime = 5
 
+
 # Sound sample
 def generateSample(frequency, fs, duration):
     return (np.sin(2 * np.pi * np.arange(fs * duration) * frequency / fs)).astype(np.float32)
+
 
 # Home Scene
 def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
@@ -47,12 +51,13 @@ def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
         # Event Handler
         def mouse_click(event, x, y, flags, param):
             hovered_objects.extend(activeScene.check_points([(x, y)]))
+
         cv2.setMouseCallback(title, mouse_click)
 
         # Is the hand in an area? If so, is it a Closed_Fist?
         for hand in home_points:
             print(hand)
-            cv2.circle(background, (resolution[0] - hand[0], hand[1]), 10, PrimaryColor, cv2.FILLED)
+            cv2.circle(background, (resolution[0] - hand[0], hand[1]), 10, Red, cv2.FILLED)
             pass
 
         # Ensuring no accidental selections by waiting a buffer
@@ -81,8 +86,9 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
     img = cv2.flip(img, 1)
     background = np.full((resolution[1], resolution[0], 3), 255, np.uint8)
     hands = detect_hands(img, resolution)
+    # time_entered = -1
 
-    if len(activeScene.contents) < 5:
+    if len(activeScene.contents) < 6:
         activeScene.contents.extend(generateCameraSelect())
     activeScene.render(background)
 
@@ -94,7 +100,7 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
 
         # Is the hand in an area? If so, is it a Closed_Fist?
         for hand in home_points:
-            cv2.circle(background, hand, 10, PrimaryColor, cv2.FILLED)
+            cv2.circle(background, hand, 10, Red, cv2.FILLED)
         print(hovered_objects)
 
         # Ensuring no accidental selections by waiting a buffer
@@ -106,6 +112,7 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
             for gesture in gesture_list:
                 gestures.append(gesture[3])
             if 'Closed_Fist' in gestures:
+                # time_entered = countdownLoader(HomeScene, timestamp, time_entered)
                 activeScene = HomeScene
                 activeScene.scene_start = timestamp
 
@@ -156,7 +163,7 @@ def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scen
     img = cv2.flip(img, 1)
     hands = detect_hands(img, resolution)
     fs = 44100  # sampling rate, Hz, must be integer
-    duration = 0.1  # in seconds, may be float
+    duration = 0.1  # in seconds, may be a float
     activeScene.render(img)
 
     # Determine where the hands are & what gestures
@@ -195,9 +202,25 @@ def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scen
 
             samples = generateSample(frequency, fs, duration)
             stream.write(volume * samples)
-            cv2.circle(img, hand_pos, 10, PrimaryColor, cv2.FILLED)
+            cv2.circle(img, hand_pos, 10, Red, cv2.FILLED)
     cv2.imshow(title, img)
     return activeScene
+
+
+# Creates a countdown confirmation when selecting buttons with your hand
+def countdownLoader(newScene: Scene, timestamp, time_entered):
+    if time_entered == -1:
+        return timestamp
+    else:
+        time_diff = timestamp - time_entered
+
+        # Text on the UI of how long until selection
+        counting = UIText((0, 0, 0), 0, 0, str(time_diff), 2, 4)
+
+        if time_diff > bufferTime:
+            activeScene = newScene
+            activeScene.scene_start = timestamp
+            return -1
 
 
 def main():
@@ -225,8 +248,8 @@ def main():
     with GestureRecognizer.create_from_options(options) as recognizer:
         print("Gesture detection initialized.")
 
+        # Setting what each scene needs when hands are captured
         while capture.isOpened():
-
             if activeScene.name == 'practice-theremin':
                 activeScene = theremin(activeScene, capture, recognizer, timestamp, stream)
 
@@ -235,7 +258,11 @@ def main():
 
             if activeScene.name == 'settings':
                 activeScene, capture = settings(activeScene, capture, recognizer, timestamp)
+
+            # Increment time
             timestamp += 1
+
+            # Exit
             if cv2.waitKey(1) == ord('q') or cv2.waitKey(1) == 27:
                 print('Exiting')
                 break

@@ -8,6 +8,7 @@ k = 80
 resolution = (k*scale[0],k*scale[1]) #(1280, 720)
 # print(resolution)
 PrimaryColor = (132, 96, 18)
+Red = (10, 50, 240)
 White = (255, 255, 255)
 Black = (0, 0, 0)
 
@@ -31,10 +32,10 @@ Cameras = UI_Element(
 
 TitleSmall = UI_Element(
     name = 'title',
-    x = 150,
-    y = 43,
+    x = 220,
+    y = 63,
     draw_list=[
-        UIText(Black, 0, 0, 'Virtual Music', 1, 2)
+        UIText(Black, 0, 0, 'Virtual Music', 1, 2),
     ]
 )
 
@@ -52,39 +53,49 @@ PracticeButton = UI_Element(
 ExitInstruct = UI_Element(
     name='exit',
     x=int(resolution[0] / 2 - 300),
-    y=int(resolution[1] - 50),
+    y=int(resolution[1] - 40),
     draw_list=[
-        UIText(Black, 0, 0, 'Press "Escape" or the "Q" key to exit.', 1, 2)
+        UIText(Black, 0, 0, 'Press "Escape" or the "Q" key to exit.', 1, 2),
+    ]
+)
+
+ControlInstruct = UI_Element(
+    name='controls',
+    x=int(resolution[0] / 2 - 245),
+    y=int(resolution[1] - 90),
+    draw_list=[
+        UIText(Black, 0, 0,
+               'Make a fist over your selection', 1, 2)
     ]
 )
 
 SettingsButton = UI_Element(
     name='settings',
     x=int(resolution[0]-210),
-    y=int(15),
+    y=int(resolution[1]-75),
     draw_list=[
-        UIRect(PrimaryColor, 0, 0, 130, 34, 1),
-        UIText(PrimaryColor, 2, 28, 'Settings', 1, 2)
+        UIRect(PrimaryColor, 0, 0, 150, 50, 1),
+        UIText(PrimaryColor, 10, 35, 'Settings', 1, 2)
     ]
 )
 
 ExitButton = UI_Element(
     name='exit',
     x=int(resolution[0]-210),
-    y=int(15),
+    y=int(25),
     draw_list=[
-        UIRect(PrimaryColor, 0, 0, 130, 34, 1),
-        UIText(PrimaryColor, 2, 28, 'Exit', 1, 2)
+        UIRect(PrimaryColor, 0, 0, 150, 50, 1),
+        UIText(PrimaryColor, 25, 35, 'Exit', 1, 2)
     ]
 )
 
 HomeButton = UI_Element(
     name='home',
     x=int(50),
-    y=int(15),
+    y=int(25),
     draw_list=[
-        UIRect(PrimaryColor, 0, 0, 92, 34, -1),
-        UIText(White, 2, 28, 'Home', 1, 2)
+        UIRect(PrimaryColor, 0, 0, 150, 50, -1),
+        UIText(White, 25, 35, 'Home', 1, 2)
     ]
 )
 
@@ -103,7 +114,9 @@ HomeScene = Scene(
         TitleBig,
         PracticeButton,
         SettingsButton,
-        ExitInstruct
+        ExitInstruct,
+        ExitButton,
+        ControlInstruct
     ]
 )
 
@@ -113,7 +126,8 @@ SettingsScene = Scene(
         TitleSmall,
         Cameras,
         HomeButton,
-        ExitButton
+        ExitButton,
+        ControlInstruct
     ]
 )
 
@@ -123,7 +137,8 @@ ThereminPractice = Scene(
         TitleSmall,
         HomeButton,
         SettingsButton,
-        ThereminSpace
+        ThereminSpace,
+        ControlInstruct
     ]
 )
 
@@ -137,13 +152,11 @@ def generateCameraSelect():
             x = listStart[0],
             y = listStart[1],
             draw_list=[
-                UIRect(PrimaryColor, 0, 0, 150, 34, -1),
-                UIText(White, 2, 28, 'No Cameras', 1, 2)
+                UIRect(PrimaryColor, 0, 0, 200, 50, -1),
+                UIText(White, 25, 35, 'No Cameras', 1, 2)
             ]
         )
         return [NoCameras]
-   
-
 
     print("Available cameras:")
     offset = 0
@@ -162,11 +175,11 @@ def generateCameraSelect():
             x = listStart[0],
             y = listStart[1] + offset,
             draw_list=[
-                UIRect(PrimaryColor, 0, 0, 150, 50, -1),
-                UIText(White, 2, 28, camera_info.name, 1, 2)
+                UIRect(PrimaryColor, 0, 0, 200, 50, -1),
+                UIText(White, 25, 35, camera_info.name, 1, 2)
             ]
         )
         camera_list.append(cameraButton)
-        offset = offset + 60
+        offset = offset + 65
     return camera_list
     pass
