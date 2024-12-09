@@ -111,11 +111,13 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
         # Home button
         if timestamp - activeScene.scene_start > bufferTime and 'home' in hovered_objects:
             gesture_list = read_gesture(img, recognizer, timestamp)
-            print(gesture_list)
+            # print(gesture_list)
             gestures = []
             for gesture in gesture_list:
+                print(gesture)
                 gestures.append(gesture[3])
-            if 'Closed_Fist' in gestures:
+            print(gestures)
+            if 'Closed_Fist' in gesture_list:
                 # time_entered = countdownLoader(HomeScene, timestamp, time_entered)
                 activeScene = HomeScene
                 activeScene.scene_start = timestamp
@@ -123,11 +125,13 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
         # Exit button
         elif timestamp - activeScene.scene_start > bufferTime and 'exit' in hovered_objects:
             gesture_list = read_gesture(img, recognizer, timestamp)
-            print(gesture_list)
+            # print(gesture_list)
             gestures = []
             for gesture in gesture_list:
+                print(gesture)
                 gestures.append(gesture[3])
-            if 'Closed_Fist' in gestures:
+            print(gestures)
+            if 'Closed_Fist' in gesture_list:
                 cv2.imshow(title, background)
                 capture.release()
                 cv2.destroyAllWindows()
@@ -142,16 +146,19 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
                     break
             if camera_object is not None:
                 gesture_list = read_gesture(img, recognizer, timestamp)
-                print(gesture_list)
+                # print(gesture_list)
                 gestures = []
                 for gesture in gesture_list:
-                    gestures.append(gesture[3])
-                if 'Closed_Fist' in gestures:
+                    print(gesture)
+                    gestures.append(gesture[2])
+                print(gestures)
+                if 'Closed_Fist' in gesture_list:
                     print(camera_object)
                     camera = camera_object.split('-')[1]
                     index = camera.split(',')[0]
                     backend = camera.split(',')[1]
                     print(index, backend)
+                    capture.release()
                     capture = cv2.VideoCapture(int(index), int(backend))
                     activeScene.scene_start = timestamp
 
