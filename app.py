@@ -29,6 +29,9 @@ resolution = (scale * aspect_ratio[0], scale * aspect_ratio[1])  # (1280, 720)
 blank_background = np.full((resolution[1], resolution[0], 3), 255, np.uint8)
 bufferTime = 5
 
+activeScene = HomeScene
+capture = None
+
 
 # Sound sample
 def generateSample(frequency, fs, duration):
@@ -36,7 +39,8 @@ def generateSample(frequency, fs, duration):
 
 
 # Home Scene
-def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
+def home(recognizer, timestamp) -> Scene:
+    global activeScene, capture
     background = np.full((resolution[1], resolution[0], 3), 255, np.uint8)
     _, img = capture.read()
     img = cv2.flip(img, 1)
@@ -69,7 +73,7 @@ def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
         def mouse_click(event, x, y, flags, param):
             global activeScene
             clicked = activeScene.check_points([(x, y)])
-            for object in clicked:
+            for hovered in clicked:
                 if 'settings' in hovered:
                     print("Changing Scene")
                     activeScene = SettingsScene
@@ -120,11 +124,12 @@ def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
                         cv2.destroyAllWindows()
         pass
     cv2.imshow(title, background)
-    return activeScene
+    # return activeScene
 
 
 # Settings Scene
-def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
+def settings(recognizer, timestamp) -> tuple:
+    global activeScene, capture
     ret, img = capture.read()
     # print(capture.getBackendName(), ret, img is None)
     img = cv2.flip(img, 1)
@@ -156,9 +161,9 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
         
         # Event Handler
         def mouse_click(event, x, y, flags, param):
-            global activeScene
+            global activeScene, capture
             clicked = activeScene.check_points([(x, y)])
-            for object in clicked:
+            for hovered in clicked:
                 if 'camera-' in hovered:
                     camera_object = hovered
                     print(camera_object)
@@ -220,12 +225,13 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
                         print("Exiting")
                         capture.release()
                         cv2.destroyAllWindows()
-                        return activeScene, capture
+                        # return activeScene, capture
     cv2.imshow(title, background)
-    return activeScene, capture
+    # return activeScene, capture
 
 # Theremin Practice Scene
-def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scene:
+def theremin(recognizer, timestamp, stream) -> Scene:
+    global activeScene, capture
     _, img = capture.read()
     img = cv2.flip(img, 1)
     img = imutils.resize(img, width=resolution[0], height=resolution[1])
@@ -260,7 +266,7 @@ def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scen
         def mouse_click(event, x, y, flags, param):
             global activeScene
             clicked = activeScene.check_points([(x, y)])
-            for object in clicked:
+            for hovered in clicked:
                 if 'settings' in hovered:
                     print("Changing Scene")
                     activeScene = SettingsScene
@@ -317,7 +323,7 @@ def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scen
                     break
         pass
     cv2.imshow(title, img)
-    return activeScene
+    # return activeScene
 
 
 # Creates a countdown confirmation when selecting buttons with your hand
@@ -337,9 +343,11 @@ def countdownLoader(newScene: Scene, timestamp, time_entered):
 
 
 def main():
+    global activeScene, capture
     if len(SettingsScene.contents) < 6:
         SettingsScene.contents.extend(generateCameraSelect())
     
+    global activeScene 
     activeScene = HomeScene
     activeScene.scene_start = 0
     camera = 0
@@ -374,13 +382,13 @@ def main():
         # Setting what each scene needs when hands are captured
         while capture.isOpened():
             if activeScene.name == 'practice-theremin':
-                activeScene = theremin(activeScene, capture, recognizer, timestamp, stream)
+                theremin(recognizer, timestamp, stream)
 
             if activeScene.name == 'home':
-                activeScene = home(activeScene, capture, recognizer, timestamp)
+                home(recognizer, timestamp)
 
             if activeScene.name == 'settings':
-                activeScene, capture = settings(activeScene, capture, recognizer, timestamp)
+                settings(recognizer, timestamp)
 
             # Increment time
             timestamp += 1
