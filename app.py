@@ -340,7 +340,7 @@ def main():
     if len(SettingsScene.contents) < 6:
         SettingsScene.contents.extend(generateCameraSelect())
     
-    activeScene = SettingsScene
+    activeScene = HomeScene
     activeScene.scene_start = 0
     camera = 0
     while True:
