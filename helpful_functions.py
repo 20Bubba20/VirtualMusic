@@ -41,7 +41,7 @@ def check_camera(camera: int, cap: cv2.VideoCapture, next_key: str| int = 'n', p
         camera = 0
         cap = cv2.VideoCapture(camera)
     print(f'Camera {camera}')
-    print('Go to NEXT camere using "n" or EXIT using ESC or "q"')
+    print(f'Go to NEXT camera using "{next_key}" or "{previous_key}" EXIT using ESC or "q"')
             
     return camera, cap
 

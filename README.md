@@ -20,36 +20,49 @@ cv2-enumerate-cameras
 
 ## Milestone 1
 
-Google Mediapipe integrated.  
+Google Mediapipe integrated.
 
-   - Gesture detection and hand tracking both function but do not connect to much else yet.
+- Gesture detection and hand tracking both function but do not connect to much else yet.
 
 Python library exploration.
 
-   - What we can use for different aspect of our application.
-   - Sound libraries, Mediapipe, GUI, etc.
+- What we can use for different aspect of our application.
+- Sound libraries, Mediapipe, GUI, etc.
 
 Competition analysis.
 
-   - What other products combine human motion and sound/music?
-   - How do they perform this? How do they compare?
+- What other products combine human motion and sound/music?
+- How do they perform this? How do they compare?
 
 ## Milestone 2
 
 Hand detection is working.
 
-   - Relevant points from the model can be obtained.
+- Relevant points from the model can be obtained.
 
 Camera switching.
 
-   - If there is more than one camera device, the app can toggle between them.
+- If there is more than one camera device, the app can toggle between them.
 
 Exploration into Godot.
 
-   - Since PySimpleGUI is no longer being considered, perhaps something else would work better.
-   - Godot has proven to have potential, but does not seem viable to switch to this late into the semester.
-   - Another Python GUI library is a better choice.
+- Since PySimpleGUI is no longer being considered, perhaps something else would work better.
+- Godot has proven to have potential, but does not seem viable to switch to this late into the semester.
+- Another Python GUI library is a better choice.
 
 ## Milestone 3
 
+Scope has been narrowed.
+
+- The project will only cover the home page, changing the camera, and practicing with a single instrument.
+
+Decided on a GUI library.
+
+- OpenCV and CV2 will provide the beginnings of a GUI framework.
+
 ## Milestone 4
+
+Building a GUI that works.
+
+- UI objects to use throughout the app.
+- Scene management and event handling (clicking, gestures as events).

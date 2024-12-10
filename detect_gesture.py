@@ -38,6 +38,7 @@ def read_gesture(frame, recognizer, timestamp: int):
     recognizer.recognize_async(mp_image, timestamp)
     local_gesture_list = gesture_list
     gesture_list = []
+    
     # print(f'In read function: {local_gesture_list}')
     return local_gesture_list
 
