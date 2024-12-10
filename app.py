@@ -31,12 +31,48 @@ bufferTime = 5
 
 activeScene = HomeScene
 capture = None
+timestamp = 0
 
 
 # Sound sample
 def generateSample(frequency, fs, duration):
     return (np.sin(2 * np.pi * np.arange(fs * duration) * frequency / fs)).astype(np.float32)
 
+def mouse_click(event, x, y, flags, param):
+    global activeScene, capture
+    if event == cv2.EVENT_LBUTTONDOWN:
+        clicked = activeScene.check_points([(x, y)])
+        for hovered in clicked:
+            if 'home' in hovered:
+                print("Changing Scene")
+                activeScene = HomeScene
+                activeScene.scene_start = timestamp
+                break
+            elif 'settings' in hovered:
+                print("Changing Scene")
+                activeScene = SettingsScene
+                activeScene.scene_start = timestamp
+                break
+            elif 'practice' in hovered:
+                print("Changing Scene")
+                activeScene = ThereminPractice
+                activeScene.scene_start = timestamp
+                break
+            elif 'camera-' in hovered:
+                camera_object = hovered
+                print(camera_object)
+                camera = camera_object.split('-')[1]
+                index = camera.split(',')[0]
+                backend = camera.split(',')[1]
+                print(index, backend)
+                capture.release()
+                capture = cv2.VideoCapture(int(index), int(backend))
+                activeScene.scene_start = timestamp
+                break
+            elif 'exit' in hovered:
+                print("Exiting")
+                capture.release()
+                cv2.destroyAllWindows()
 
 # Home Scene
 def home(recognizer, timestamp) -> Scene:
@@ -70,26 +106,26 @@ def home(recognizer, timestamp) -> Scene:
             hovered_objects = activeScene.check_points(home_points)
 
         # Event Handler
-        def mouse_click(event, x, y, flags, param):
-            global activeScene
-            if event == cv2.EVENT_LBUTTONDOWN:
-                clicked = activeScene.check_points([(x, y)])
-                for hovered in clicked:
-                    if 'settings' in hovered:
-                        print("Changing Scene")
-                        activeScene = SettingsScene
-                        activeScene.scene_start = timestamp
-                        break
-                    if 'practice' in hovered:
-                        print("Changing Scene")
-                        activeScene = ThereminPractice
-                        activeScene.scene_start = timestamp
-                        break
+        # def mouse_click(event, x, y, flags, param):
+        #     global activeScene
+        #     if event == cv2.EVENT_LBUTTONDOWN:
+        #         clicked = activeScene.check_points([(x, y)])
+        #         for hovered in clicked:
+        #             if 'settings' in hovered:
+        #                 print("Changing Scene")
+        #                 activeScene = SettingsScene
+        #                 activeScene.scene_start = timestamp
+        #                 break
+        #             if 'practice' in hovered:
+        #                 print("Changing Scene")
+        #                 activeScene = ThereminPractice
+        #                 activeScene.scene_start = timestamp
+        #                 break
 
-        try:
-            cv2.setMouseCallback(title, mouse_click)
-        except:
-            pass
+        # try:
+        #     cv2.setMouseCallback(title, mouse_click)
+        # except:
+        #     pass
         
         if hovered_objects != []:
             # Get Gesture(s)
@@ -161,37 +197,41 @@ def settings(recognizer, timestamp) -> tuple:
             hovered_objects = activeScene.check_points(home_points)
         
         # Event Handler
-        def mouse_click(event, x, y, flags, param):
-            global activeScene, capture
-            if event == cv2.EVENT_LBUTTONDOWN:
-                clicked = activeScene.check_points([(x, y)])
-                for hovered in clicked:
-                    if 'camera-' in hovered:
-                        camera_object = hovered
-                        print(camera_object)
-                        camera = camera_object.split('-')[1]
-                        index = camera.split(',')[0]
-                        backend = camera.split(',')[1]
-                        print(index, backend)
-                        capture.release()
-                        capture = cv2.VideoCapture(int(index), int(backend))
-                        activeScene.scene_start = timestamp
-                        break
-                    if 'settings' in hovered:
-                        print("Changing Scene")
-                        activeScene = SettingsScene
-                        activeScene.scene_start = timestamp
-                        break
-                    if 'home' in hovered:
-                        print("Changing Scene")
-                        activeScene = HomeScene
-                        activeScene.scene_start = timestamp
-                        break
+        # def mouse_click(event, x, y, flags, param):
+        #     global activeScene, capture
+        #     if event == cv2.EVENT_LBUTTONDOWN:
+        #         clicked = activeScene.check_points([(x, y)])
+        #         for hovered in clicked:
+        #             if 'camera-' in hovered:
+        #                 camera_object = hovered
+        #                 print(camera_object)
+        #                 camera = camera_object.split('-')[1]
+        #                 index = camera.split(',')[0]
+        #                 backend = camera.split(',')[1]
+        #                 print(index, backend)
+        #                 capture.release()
+        #                 capture = cv2.VideoCapture(int(index), int(backend))
+        #                 activeScene.scene_start = timestamp
+        #                 break
+        #             if 'settings' in hovered:
+        #                 print("Changing Scene")
+        #                 activeScene = SettingsScene
+        #                 activeScene.scene_start = timestamp
+        #                 break
+        #             if 'home' in hovered:
+        #                 print("Changing Scene")
+        #                 activeScene = HomeScene
+        #                 activeScene.scene_start = timestamp
+        #                 break
+        #             if 'exit' in hovered:
+        #                 print("Exiting")
+        #                 capture.release()
+        #                 cv2.destroyAllWindows()
 
-        try:
-            cv2.setMouseCallback(title, mouse_click)
-        except:
-            pass
+        # try:
+        #     cv2.setMouseCallback(title, mouse_click)
+        # except:
+        #     pass
         
         if hovered_objects != []:
             # Get Gesture(s)
@@ -265,26 +305,26 @@ def theremin(recognizer, timestamp, stream) -> Scene:
             hovered_objects = activeScene.check_points(theremin_points)
 
         # Event Handler
-        def mouse_click(event, x, y, flags, param):
-            global activeScene
-            if event == cv2.EVENT_LBUTTONDOWN:
-                clicked = activeScene.check_points([(x, y)])
+        # def mouse_click(event, x, y, flags, param):
+        #     global activeScene
+        #     if event == cv2.EVENT_LBUTTONDOWN:
+        #         clicked = activeScene.check_points([(x, y)])
             
-                for hovered in clicked:
-                    if 'settings' in hovered:
-                        print("Changing Scene")
-                        activeScene = SettingsScene
-                        activeScene.scene_start = timestamp
-                        break
-                    if 'home' in hovered:
-                        print("Changing Scene")
-                        activeScene = HomeScene
-                        activeScene.scene_start = timestamp
-                        break
-        try:
-            cv2.setMouseCallback(title, mouse_click)
-        except:
-            pass
+        #         for hovered in clicked:
+        #             if 'settings' in hovered:
+        #                 print("Changing Scene")
+        #                 activeScene = SettingsScene
+        #                 activeScene.scene_start = timestamp
+        #                 break
+        #             if 'home' in hovered:
+        #                 print("Changing Scene")
+        #                 activeScene = HomeScene
+        #                 activeScene.scene_start = timestamp
+        #                 break
+        # try:
+        #     cv2.setMouseCallback(title, mouse_click)
+        # except:
+        #     pass
         
         if hovered_objects != []:
             # Get Gesture(s)
@@ -347,11 +387,10 @@ def countdownLoader(newScene: Scene, timestamp, time_entered):
 
 
 def main():
-    global activeScene, capture
+    global activeScene, capture, timestamp
     if len(SettingsScene.contents) < 6:
         SettingsScene.contents.extend(generateCameraSelect())
     
-    global activeScene 
     activeScene = HomeScene
     activeScene.scene_start = 0
     camera = 0
@@ -401,6 +440,12 @@ def main():
             if cv2.waitKey(1) == ord('q') or cv2.waitKey(1) == 27:
                 print('Exiting')
                 break
+            try:
+                cv2.setMouseCallback(title, mouse_click)
+            except:
+                passq
+            
+            
 
     capture.release()
     cv2.destroyAllWindows()
