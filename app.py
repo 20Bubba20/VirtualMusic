@@ -39,42 +39,80 @@ def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
     background = np.full((resolution[1], resolution[0], 3), 255, np.uint8)
     _, img = capture.read()
     img = cv2.flip(img, 1)
-    hands = detect_hands(img, resolution)
+    
+    hands = None
+    try:
+        hands = detect_hands(img, resolution)
+    except Exception as err:
+        #print(err)
+        pass
+    
     activeScene.render(background)
 
     # Determine where the hands are & what gestures
     # Check if there is a hand
     if hands is not None:
         home_points = get_points_center(hands)
-        hovered_objects = activeScene.check_points(home_points)
+        hovered_objects = []
+        # Draw a spot for each hand
+        for hand in home_points:
+            cv2.circle(background, hand, 10, Red, cv2.FILLED)
+        
+        # Ensuring no accidental selections by waiting a buffer
+        if timestamp - activeScene.scene_start > bufferTime:
+            
+            # Check if the hand is in an area
+            hovered_objects = activeScene.check_points(home_points)
 
         # Event Handler
         def mouse_click(event, x, y, flags, param):
-            hovered_objects.extend(activeScene.check_points([(x, y)]))
+            clicked = activeScene.check_points([(x, y)])
+            for object in clicked:
+                if 'settings' in hovered:
+                    print("Changing Scene")
+                    activeScene = SettingsScene
+                    activeScene.scene_start = timestamp
+                    break
+                if 'practice' in hovered:
+                    print("Changing Scene")
+                    activeScene = ThereminPractice
+                    activeScene.scene_start = timestamp
+                    break
 
         cv2.setMouseCallback(title, mouse_click)
-
-        # Is the hand in an area? If so, is it a Closed_Fist?
-        for hand in home_points:
-            print(hand)
-            cv2.circle(background, (resolution[0] - hand[0], hand[1]), 10, Red, cv2.FILLED)
-            pass
-
-        # Ensuring no accidental selections by waiting a buffer
-        # Practice button
-        if timestamp - activeScene.scene_start > bufferTime and 'practice' in hovered_objects:
+        
+        if hovered_objects != []:
+            # Get Gesture(s)
             gesture_list = read_gesture(img, recognizer, timestamp)
-            if 'Closed_Fist' in gesture_list:
-                activeScene = ThereminPractice
-                activeScene.scene_start = timestamp
+            gestures = []
+            for gesture in gesture_list:
+                print(gesture)
+                # For testing to make sure index is correct
+                for index, value in enumerate(gesture):
+                    print(index, value)
+                gestures.append(gesture[3])
+            print(gestures)
 
-        # Settings button
-        elif timestamp - activeScene.scene_start > bufferTime and 'settings' in hovered_objects:
-            gesture_list = read_gesture(img, recognizer, timestamp)
-            if 'Closed_Fist' in gesture_list:
-                activeScene = SettingsScene
-                activeScene.scene_start = timestamp
+        
 
+            # Is the hand in an area? If so, is it a Closed_Fist?
+
+            if 'Closed_Fist' in gestures:
+                for hovered in hovered_objects:
+                    if 'settings' in hovered:
+                        print("Changing Scene")
+                        activeScene = SettingsScene
+                        activeScene.scene_start = timestamp
+                        break
+                    if 'practice' in hovered:
+                        print("Changing Scene")
+                        activeScene = ThereminPractice
+                        activeScene.scene_start = timestamp
+                        break
+                    if 'exit' in hovered:
+                        print("Exiting")
+                        capture.release()
+                        cv2.destroyAllWindows()
         pass
     cv2.imshow(title, background)
     return activeScene
@@ -100,59 +138,23 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
     # Check if there is a hand
     if hands is not None:
         home_points = get_points_center(hands)
-        hovered_objects = activeScene.check_points(home_points)
-
-        # Is the hand in an area? If so, is it a Closed_Fist?
+        hovered_objects = []
+        # Draw a spot for each hand
         for hand in home_points:
             cv2.circle(background, hand, 10, Red, cv2.FILLED)
-        print(hovered_objects)
-
+        
         # Ensuring no accidental selections by waiting a buffer
-        # Home button
-        if timestamp - activeScene.scene_start > bufferTime and 'home' in hovered_objects:
-            gesture_list = read_gesture(img, recognizer, timestamp)
-            # print(gesture_list)
-            gestures = []
-            for gesture in gesture_list:
-                print(gesture)
-                gestures.append(gesture[3])
-            print(gestures)
-            if 'Closed_Fist' in gesture_list:
-                # time_entered = countdownLoader(HomeScene, timestamp, time_entered)
-                activeScene = HomeScene
-                activeScene.scene_start = timestamp
-
-        # Exit button
-        elif timestamp - activeScene.scene_start > bufferTime and 'exit' in hovered_objects:
-            gesture_list = read_gesture(img, recognizer, timestamp)
-            # print(gesture_list)
-            gestures = []
-            for gesture in gesture_list:
-                print(gesture)
-                gestures.append(gesture[3])
-            print(gestures)
-            if 'Closed_Fist' in gesture_list:
-                cv2.imshow(title, background)
-                capture.release()
-                cv2.destroyAllWindows()
-                return activeScene, None
-
-        # Camera selection
-        elif timestamp - activeScene.scene_start > bufferTime:
-            camera_object = None
-            for hovered in hovered_objects:
+        if timestamp - activeScene.scene_start > bufferTime:
+            
+            # Check if the hand is in an area
+            hovered_objects = activeScene.check_points(home_points)
+        
+        # Event Handler
+        def mouse_click(event, x, y, flags, param):
+            clicked = activeScene.check_points([(x, y)])
+            for object in clicked:
                 if 'camera-' in hovered:
                     camera_object = hovered
-                    break
-            if camera_object is not None:
-                gesture_list = read_gesture(img, recognizer, timestamp)
-                # print(gesture_list)
-                gestures = []
-                for gesture in gesture_list:
-                    print(gesture)
-                    gestures.append(gesture[2])
-                print(gestures)
-                if 'Closed_Fist' in gesture_list:
                     print(camera_object)
                     camera = camera_object.split('-')[1]
                     index = camera.split(',')[0]
@@ -161,60 +163,148 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
                     capture.release()
                     capture = cv2.VideoCapture(int(index), int(backend))
                     activeScene.scene_start = timestamp
+                    break
+                if 'settings' in hovered:
+                    print("Changing Scene")
+                    activeScene = SettingsScene
+                    activeScene.scene_start = timestamp
+                    break
+                if 'home' in hovered:
+                    print("Changing Scene")
+                    activeScene = HomeScene
+                    activeScene.scene_start = timestamp
+                    break
 
-            pass
-        pass
+        cv2.setMouseCallback(title, mouse_click)
+        
+        if hovered_objects != []:
+            # Get Gesture(s)
+            gesture_list = read_gesture(img, recognizer, timestamp)
+            gestures = []
+            for gesture in gesture_list:
+                print(gesture)
+                # For testing to make sure index is correct
+                for index, value in enumerate(gesture):
+                    print(index, value)
+                gestures.append(gesture[3])
+            print(gestures)
+            camera_object = None
+            if 'Closed_Fist' in gestures:
+                for hovered in hovered_objects:
+                    if 'camera-' in hovered:
+                        camera_object = hovered
+                        print(camera_object)
+                        camera = camera_object.split('-')[1]
+                        index = camera.split(',')[0]
+                        backend = camera.split(',')[1]
+                        print(index, backend)
+                        capture.release()
+                        capture = cv2.VideoCapture(int(index), int(backend))
+                        activeScene.scene_start = timestamp
+                        break
+                    if 'home' in hovered:
+                        print("Changing Scene")
+                        activeScene = HomeScene
+                        activeScene.scene_start = timestamp
+                        break
+                    if 'exit' in hovered:
+                        print("Exiting")
+                        capture.release()
+                        cv2.destroyAllWindows()
+                        return activeScene, capture
     cv2.imshow(title, background)
     return activeScene, capture
 
-
 # Theremin Practice Scene
 def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scene:
+    background = np.full((resolution[1], resolution[0], 3), 255, np.uint8)
     _, img = capture.read()
     img = cv2.flip(img, 1)
-    hands = detect_hands(img, resolution)
     fs = 44100  # sampling rate, Hz, must be integer
     duration = 0.1  # in seconds, may be a float
+    
+    hands = None
+    try:
+        hands = detect_hands(img, resolution)
+    except Exception as err:
+        #print(err)
+        pass
+    
     activeScene.render(img)
 
     # Determine where the hands are & what gestures
     # Check if there is a hand
     if hands is not None:
         theremin_points = get_points_center(hands)
+        hovered_objects = []
+        # Draw a spot for each hand
+        for hand in theremin_points:
+            cv2.circle(background, hand, 10, Red, cv2.FILLED)
+        
+        # Ensuring no accidental selections by waiting a buffer
+        if timestamp - activeScene.scene_start > bufferTime:
+            
+            # Check if the hand is in an area
+            hovered_objects = activeScene.check_points(theremin_points)
 
-        hand_pos = theremin_points[0]
-        hovered_objects = activeScene.check_points([hand_pos])
-
-        # If the theremin is not being played
-        if 'theremin' not in hovered_objects:
-
-            # Ensuring no accidental selections by waiting a buffer
-            # Home button
-            if timestamp - activeScene.scene_start > bufferTime and 'home' in hovered_objects:
-                gesture_list = read_gesture(img, recognizer, timestamp)
-                if 'Closed_Fist' in gesture_list:
-                    activeScene = HomeScene
-                    activeScene.scene_start = timestamp
-
-            # Settings button
-            elif timestamp - activeScene.scene_start > bufferTime and 'settings' in hovered_objects:
-                gesture_list = read_gesture(img, recognizer, timestamp)
-                if 'Closed_Fist' in gesture_list:
+        # Event Handler
+        def mouse_click(event, x, y, flags, param):
+            clicked = activeScene.check_points([(x, y)])
+            for object in clicked:
+                if 'settings' in hovered:
+                    print("Changing Scene")
                     activeScene = SettingsScene
                     activeScene.scene_start = timestamp
+                    break
+                if 'home' in hovered:
+                    print("Changing Scene")
+                    activeScene = HomeScene
+                    activeScene.scene_start = timestamp
+                    break
 
-        else:
-            # Play Tone
-            x, y = theremin_points[0]
-            # x -> frequency
-            frequency = np.interp(x, [0, resolution[0]], [130.81, 193.88])
-            # y -> volume
-            volume = np.interp(y, [0, resolution[1]], [0.10, 0.80])
+        cv2.setMouseCallback(title, mouse_click)
+        
+        if hovered_objects != []:
+            # Get Gesture(s)
+            gesture_list = read_gesture(img, recognizer, timestamp)
+            gestures = []
+            for gesture in gesture_list:
+                print(gesture)
+                # For testing to make sure index is correct
+                for index, value in enumerate(gesture):
+                    print(index, value)
+                gestures.append(gesture[3])
+            print(gestures)
 
-            samples = generateSample(frequency, fs, duration)
-            stream.write(volume * samples)
-            cv2.circle(img, hand_pos, 10, Red, cv2.FILLED)
-    cv2.imshow(title, img)
+
+            # Is the hand in an area? If so, is it a Closed_Fist?
+
+            if 'Closed_Fist' in gestures:
+                for hovered in hovered_objects:
+                    if 'settings' in hovered:
+                        print("Changing Scene")
+                        activeScene = SettingsScene
+                        activeScene.scene_start = timestamp
+                        break
+                    if 'home' in hovered:
+                        print("Changing Scene")
+                        activeScene = HomeScene
+                        activeScene.scene_start = timestamp
+                        break
+            for hovered in hovered_objects:    
+                if 'theremin' in hovered:
+                    # Play Tone
+                    x, y = theremin_points[0]
+                    # x -> frequency
+                    frequency = np.interp(x, [0, resolution[0]], [130.81, 193.88])
+                    # y -> volume
+                    volume = np.interp(y, [0, resolution[1]], [0.10, 0.80])
+
+                    samples = generateSample(frequency, fs, duration)
+                    stream.write(volume * samples)
+                    break
+        pass
+    cv2.imshow(title, background)
     return activeScene
 
 
@@ -238,7 +328,8 @@ def main():
     if len(SettingsScene.contents) < 6:
         SettingsScene.contents.extend(generateCameraSelect())
     
-    activeScene = SettingsScene
+    activeScene = HomeScene
+    activeScene.scene_start = 0
     camera = 0
     while True:
         capture = cv2.VideoCapture(camera)
