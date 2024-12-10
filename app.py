@@ -443,7 +443,7 @@ def main():
             try:
                 cv2.setMouseCallback(title, mouse_click)
             except:
-                passq
+                pass
             
             
 
