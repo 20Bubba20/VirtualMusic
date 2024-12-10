@@ -1,6 +1,7 @@
 # Sound Libraries
 import time
 
+import imutils
 import pyaudio
 import numpy as np
 
@@ -66,6 +67,7 @@ def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
 
         # Event Handler
         def mouse_click(event, x, y, flags, param):
+            global activeScene
             clicked = activeScene.check_points([(x, y)])
             for object in clicked:
                 if 'settings' in hovered:
@@ -79,7 +81,10 @@ def home(activeScene: Scene, capture, recognizer, timestamp) -> Scene:
                     activeScene.scene_start = timestamp
                     break
 
-        cv2.setMouseCallback(title, mouse_click)
+        try:
+            cv2.setMouseCallback(title, mouse_click)
+        except:
+            pass
         
         if hovered_objects != []:
             # Get Gesture(s)
@@ -151,6 +156,7 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
         
         # Event Handler
         def mouse_click(event, x, y, flags, param):
+            global activeScene
             clicked = activeScene.check_points([(x, y)])
             for object in clicked:
                 if 'camera-' in hovered:
@@ -175,7 +181,10 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
                     activeScene.scene_start = timestamp
                     break
 
-        cv2.setMouseCallback(title, mouse_click)
+        try:
+            cv2.setMouseCallback(title, mouse_click)
+        except:
+            pass
         
         if hovered_objects != []:
             # Get Gesture(s)
@@ -217,9 +226,9 @@ def settings(activeScene: Scene, capture, recognizer, timestamp) -> tuple:
 
 # Theremin Practice Scene
 def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scene:
-    background = np.full((resolution[1], resolution[0], 3), 255, np.uint8)
     _, img = capture.read()
     img = cv2.flip(img, 1)
+    img = imutils.resize(img, width=resolution[0], height=resolution[1])
     fs = 44100  # sampling rate, Hz, must be integer
     duration = 0.1  # in seconds, may be a float
     
@@ -239,7 +248,7 @@ def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scen
         hovered_objects = []
         # Draw a spot for each hand
         for hand in theremin_points:
-            cv2.circle(background, hand, 10, Red, cv2.FILLED)
+            cv2.circle(img, hand, 10, Red, cv2.FILLED)
         
         # Ensuring no accidental selections by waiting a buffer
         if timestamp - activeScene.scene_start > bufferTime:
@@ -249,6 +258,7 @@ def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scen
 
         # Event Handler
         def mouse_click(event, x, y, flags, param):
+            global activeScene
             clicked = activeScene.check_points([(x, y)])
             for object in clicked:
                 if 'settings' in hovered:
@@ -261,8 +271,10 @@ def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scen
                     activeScene = HomeScene
                     activeScene.scene_start = timestamp
                     break
-
-        cv2.setMouseCallback(title, mouse_click)
+        try:
+            cv2.setMouseCallback(title, mouse_click)
+        except:
+            pass
         
         if hovered_objects != []:
             # Get Gesture(s)
@@ -304,7 +316,7 @@ def theremin(activeScene: Scene, capture, recognizer, timestamp, stream) -> Scen
                     stream.write(volume * samples)
                     break
         pass
-    cv2.imshow(title, background)
+    cv2.imshow(title, img)
     return activeScene
 
 
@@ -328,7 +340,7 @@ def main():
     if len(SettingsScene.contents) < 6:
         SettingsScene.contents.extend(generateCameraSelect())
     
-    activeScene = HomeScene
+    activeScene = SettingsScene
     activeScene.scene_start = 0
     camera = 0
     while True:
