@@ -52,8 +52,8 @@ PracticeButton = UI_Element(
 
 ExitInstruct = UI_Element(
     name='exit',
-    x=int(resolution[0] / 2 - 300),
-    y=int(resolution[1] - 40),
+    x=int(20),
+    y=int(resolution[1] - 20),
     draw_list=[
         UIText(Black, 0, 0, 'Press "Escape" or the "Q" key to exit.', 1, 2),
     ]
@@ -61,11 +61,11 @@ ExitInstruct = UI_Element(
 
 ControlInstruct = UI_Element(
     name='controls',
-    x=int(resolution[0] / 2 - 245),
-    y=int(resolution[1] - 90),
+    x=int(20),
+    y=int(resolution[1] - 60),
     draw_list=[
         UIText(Black, 0, 0,
-               'Make a fist over your selection', 1, 2)
+               'Hover over your selection & make a fist with your other hand', 1, 2)
     ]
 )
 
